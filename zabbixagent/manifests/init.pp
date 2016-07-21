@@ -2,47 +2,48 @@
 # ===========================
 #
 # Full description of class zabbixagent here.
-#
-# Parameters
-# ----------
-#
-# Document parameters here.
-#
-# * `sample parameter`
-# Explanation of what this parameter affects and what it defaults to.
-# e.g. "Specify one or more upstream ntp servers as an array."
-#
+# Quick way to deploy the zabbix-agent and get it up and running.
 # Variables
 # ----------
-#
-# Here you should define a list of variables that this module would require.
-#
-# * `sample variable`
-#  Explanation of how this variable affects the function of this class and if
-#  it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#  External Node Classifier as a comma separated list of hostnames." (Note,
-#  global variables should be avoided in favor of class parameters as
-#  of Puppet 2.6.)
+# server 
+# hostname
+# activeserver
+# port
 #
 # Examples
 # --------
-#
-# @example
-#    class { 'zabbixagent':
-#      servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
-#    }
-#
+# Set your ALL of the variables above in your hiera yaml file as such:
+# zabbixagent::server "10.10.10.10" 
+# zabbixagent::port "10050"
 # Authors
 # -------
 #
-# Author Name <author@domain.com>
+# Author Name obdnanr@gmail.com
 #
 # Copyright
 # ---------
 #
-# Copyright 2016 Your name here, unless otherwise noted.
-#
-class zabbixagent {
+# GNU GPLv3 Brandon Kelley, unless otherwise noted.
 
-
+class zabbixagent (
+  $server       = '',
+  $port         = '',
+  $serveractive = '',
+  $zabhostname  = ''
+) { 
+  package { "zabbix-agent":
+    ensure  => installed,
+  }
+  service { "zabbix-agent":
+    ensure  => running,
+    enable  => true,
+    require => Package["zabbix-agent"],
+  }
+  file { "/etc/zabbix/zabbix_agentd.conf":
+    notify  => Service["zabbix-agent"],
+    ensure  => present,
+    content => template("zabbixagent/zabbix_agentd.conf.erb"),
+  }
 }
+
+
